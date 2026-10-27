@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chanakya | Sandeep Gowravam</title>
+  
+  <!-- Typography & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Top App Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-crest" style="width: 44px; height: 44px; min-width: 44px; max-width: 44px; overflow: hidden; border-radius: 12px; flex-shrink: 0;">
+  <img 
+    src="https://lh3.googleusercontent.com/d/1ytfup2H5mKQi2VIWaJXErJNpb3UuH0fb" 
+    alt="Chanakya Crest" 
+    class="brand-crest-img"
+    referrerpolicy="no-referrer"
+    style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px;"
+  />
+</div>
+        <div class="brand-info">
+          <h1 class="badge-os">Chanakya</h1>
+          <p>Discipline &bull; Execution &bull; Success</p>
+        </div>
+      </div>
+
+      <!-- Cohort Switcher Bar -->
+      <div class="cohort-switcher-wrap">
+        <span class="switcher-label">Active Member:</span>
+        <div class="members-carousel" id="membersPillList">
+          <!-- Populated by JS -->
+        </div>
+        <button class="btn-icon-add" onclick="openMemberModal()" title="Add a new teammate">+ Add</button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="generatePdfReport()">
+          <span class="icon">📄</span> Export PDF Report
+        </button>
+        <button class="btn btn-primary" onclick="openStandupModal()">
+          <span class="icon">⚡</span> Log Check-In
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Strategic Neeti Banner -->
+  <section class="quote-strip">
+    <div class="quote-content">
+      <span class="quote-tag">Strategic Principle</span>
+      <p id="chanakyaQuote">"A man is great by deeds, not by birth." — Chanakya</p>
+    </div>
+    <button class="quote-refresh" onclick="rotatePrinciple()" title="New Principle">↻</button>
+  </section>
+
+  <!-- Main Workspace -->
+  <main class="dashboard-body">
+
+    <!-- KPI Metric Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Active Momentum Streak</span>
+          <span class="kpi-badge fire">🔥</span>
+        </div>
+        <div class="kpi-val" id="metricStreak">0 <span class="unit">Days</span></div>
+        <div class="kpi-foot" id="metricStreakFoot">No standup yet today</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Total Time Invested</span>
+          <span class="kpi-badge time">⏱️</span>
+        </div>
+        <div class="kpi-val" id="metricTotalHrs">0.0 <span class="unit">Hrs</span></div>
+        <div class="kpi-foot" id="metricWeeklyHrs">Past 7 days: 0.0 hrs</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Execution & Focus Quality</span>
+          <span class="kpi-badge flow">⚡</span>
+        </div>
+        <div class="kpi-val" id="metricFlow">-- <span class="unit">/ 5.0</span></div>
+        <div class="kpi-foot">Average deep-work energy</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Scheduled Exams & Works</span>
+          <span class="kpi-badge blocker">📝</span>
+        </div>
+        <div class="kpi-val" id="metricEvents">0</div>
+        <div class="kpi-foot" id="metricEventsFoot">Upcoming deadlines / tests</div>
+      </div>
+    </section>
+
+    <!-- Analytics Section -->
+    <section class="analytics-row">
+      <div class="glass-card chart-container-large">
+        <div class="card-head">
+          <div>
+            <h3>Cohort Velocity Comparison</h3>
+            <p class="subtitle">Hours contributed over the last 7 days per member</p>
+          </div>
+          <span class="pill-metric">Live Velocity</span>
+        </div>
+        <div class="chart-canvas-box">
+          <canvas id="velocityChart"></canvas>
+        </div>
+      </div>
+
+      <div class="glass-card chart-container-small">
+        <div class="card-head">
+          <div>
+            <h3>Domain Distribution</h3>
+            <p class="subtitle">Work split across technical modules</p>
+          </div>
+        </div>
+        <div class="chart-canvas-box doughnut-center">
+          <canvas id="domainChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Multi-Column Operational Grid -->
+    <div class="operations-grid">
+      
+      <!-- Left Column: Calendar, Agenda & Roadmap -->
+      <aside class="ops-left">
+        
+        <!-- Interactive Monthly Matrix with Work/Exam Support -->
+        <div class="glass-card calendar-module">
+          <div class="card-head cal-head">
+            <div>
+              <h3 id="calendarTitle">Calendar</h3>
+              <p class="subtitle">Standup streaks, exams & deadlines</p>
+            </div>
+            <div class="cal-controls">
+              <button class="cal-btn" onclick="shiftMonth(-1)">&larr;</button>
+              <button class="cal-btn today" onclick="goTodayMonth()">Today</button>
+              <button class="cal-btn" onclick="shiftMonth(1)">&rarr;</button>
+            </div>
+          </div>
+          
+          <div class="cal-legend">
+            <span class="legend-chip"><span class="legend-color-dot" style="background:#06b6d4;"></span> Check-in</span>
+            <span class="legend-chip"><span class="legend-badge-text">📝</span> Exam</span>
+            <span class="legend-chip"><span class="legend-badge-text">💼</span> Work</span>
+            <span class="legend-chip"><span class="legend-badge-text">⏰</span> Deadline</span>
+          </div>
+
+          <div class="cal-weekdays">
+            <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+          </div>
+          <div class="cal-cells" id="calendarGrid"></div>
+          
+          <!-- Detailed Day Inspector Panel -->
+          <div class="cal-day-inspector" id="calendarDayInspector">
+            <div class="inspector-top">
+              <div class="inspector-date" id="selectedDateTitle">Today's Agenda</div>
+              <button class="btn-micro-action" onclick="openEventModal()">+ Add Work / Exam</button>
+            </div>
+            <div class="inspector-content" id="selectedDateContent">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Targets Execution Queue -->
+        <div class="glass-card target-module">
+          <div class="card-head">
+            <div>
+              <h3>Target Queue</h3>
+              <p class="subtitle">Pledged next targets from standups</p>
+            </div>
+            <span class="badge-counter" id="targetCount">0 Tasks</span>
+          </div>
+          <div class="target-list" id="targetQueueList"></div>
+        </div>
+
+        <!-- Cohort Milestones Roadmap -->
+        <div class="glass-card milestones-module">
+          <div class="card-head">
+            <div>
+              <h3>Major Milestones</h3>
+              <p class="subtitle">Key project & curriculum benchmarks</p>
+            </div>
+            <button class="btn-micro" onclick="openMilestoneModal()">+ Milestone</button>
+          </div>
+          <div class="milestones-feed" id="milestonesList"></div>
+        </div>
+
+      </aside>
+
+      <!-- Right Column: Peer Feed & Accountability Wall -->
+      <section class="ops-right">
+        <div class="glass-card feed-module">
+          <div class="card-head">
+            <div>
+              <h3>Daily Accountability Feed</h3>
+              <p class="subtitle">Real-time log of accomplishments, blockers, and peer coaching</p>
+            </div>
+            <div class="feed-filters" id="feedFilterButtons">
+              <button class="filter-pill active" onclick="setCohortFilter('all')">All Cohort</button>
+            </div>
+          </div>
+
+          <div class="feed-scroll" id="feedLogsContainer"></div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal 1: Daily Progress Log Form -->
+  <div class="modal-overlay" id="standupModal">
+    <div class="modal-box modal-expanded">
+      <div class="modal-top">
+        <div class="modal-titles">
+          <h2>Log Daily Standup</h2>
+          <p>Record your work, tomorrow's pledge, and 1% continuous improvement</p>
+        </div>
+        <button class="close-btn" onclick="closeStandupModal()">&times;</button>
+      </div>
+
+      <form id="standupForm" onsubmit="submitStandupForm(event)">
+        <div class="form-row-2">
+          <div class="input-block">
+            <label>Teammate</label>
+            <select id="logMemberSelect" required></select>
+          </div>
+          <div class="input-block">
+            <label>Date</label>
+            <input type="date" id="logDateInput" required />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="input-block">
+            <div class="slider-header">
+              <label>Time Invested</label>
+              <span class="slider-value-pill" id="hoursValDisplay">3.5 hrs</span>
+            </div>
+            <input type="range" id="logHoursSlider" min="0.5" max="16" step="0.5" value="3.5" oninput="updateHoursSlider(this.value)" />
+          </div>
+
+          <div class="input-block">
+            <label>Primary Module / Subject</label>
+            <select id="logDomainSelect" required>
+              <option value="VLSI & Digital Logic">VLSI & Digital Logic (Verilog/FPGA)</option>
+              <option value="Exam Preparation">Exam Preparation</option>
+              <option value="Programming Language">Programming Languages</option>
+              <option value="GATE / CAT">GATE / CAT</option>
+              <option value="AI & ML ">AI & ML </option>
+              <option value="Software Tool Exposure">Software Tool Exposure</option>
+              <option value="Core B.Tech Academics">Core Engineering & Academics</option>
+              <option value="Aptitude & Competitive Exams">GATE / CAT / Placement Preparation</option>
+              <option value="Project">Project</option>
+              <option value="Other Workspace">Other Works</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-block">
+          <label>What did you accomplish today? <span class="req">*</span></label>
+          <textarea id="logDoneText" rows="3" placeholder="Modules designed, problems solved, simulation benchmarks achieved, papers reviewed..." required></textarea>
+        </div>
+
+        <div class="input-block">
+          <label>Tomorrow's Single Most Critical Target <span class="req">*</span></label>
+          <input type="text" id="logTargetText" placeholder="Specific goal you will execute next session..." required />
+        </div>
+
+        <div class="input-block">
+          <label>Energy & Focus State (1 to 5)</label>
+          <div class="energy-picker">
+            <label class="energy-option">
+              <input type="radio" name="energyRadio" value="1" />
+              <div class="energy-card"><span>😫</span> 1 - Drained</div>
+            </label>
+            <label class="energy-option">
+              <input type="radio" name="energyRadio" value="2" />
+              <div class="energy-card"><span>🥱</span> 2 - Sluggish</div>
+            </label>
+            <label class="energy-option">
+              <input type="radio" name="energyRadio" value="3" />
+              <div class="energy-card"><span>🙂</span> 3 - Steady</div>
+            </label>
+            <label class="energy-option">
+              <input type="radio" name="energyRadio" value="4" checked />
+              <div class="energy-card"><span>⚡</span> 4 - High Focus</div>
+            </label>
+            <label class="energy-option">
+              <input type="radio" name="energyRadio" value="5" />
+              <div class="energy-card"><span>🔥</span> 5 - Deep Flow</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="input-block">
+            <label>Blocker or Problem to Solve (Optional)</label>
+            <input type="text" id="logBlockerInput" placeholder="Synthesis bug, circuit instability, conceptual doubt..." />
+          </div>
+          <div class="input-block">
+            <label>1% Better Micro-Habit</label>
+            <input type="text" id="logImprovementInput" placeholder="e.g. Cut phone usage during first 90m block..." />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeStandupModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Publish to Cohort</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Schedule Calendar Exam / Work / Event -->
+  <div class="modal-overlay" id="eventModal">
+    <div class="modal-box">
+      <div class="modal-top">
+        <div class="modal-titles">
+          <h2>Schedule Exam or Work</h2>
+          <p>Add critical exams, submissions, or priorities to the cohort calendar</p>
+        </div>
+        <button class="close-btn" onclick="closeEventModal()">&times;</button>
+      </div>
+
+      <form id="eventForm" onsubmit="submitNewEvent(event)">
+        <div class="input-block">
+          <label>Title / Description <span class="req">*</span></label>
+          <input type="text" id="eventTitleInput" placeholder="e.g. Mid-Term Exam: Digital System Design, or Verilog Synthesizer submission" required />
+        </div>
+
+        <div class="form-row-2">
+          <div class="input-block">
+            <label>Date <span class="req">*</span></label>
+            <input type="date" id="eventDateInput" required />
+          </div>
+          <div class="input-block">
+            <label>Priority</label>
+            <select id="eventPrioritySelect">
+              <option value="high">🔴 High / Urgent</option>
+              <option value="medium" selected>🟡 Medium Priority</option>
+              <option value="normal">🔵 Standard</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-block">
+          <label>Category / Type <span class="req">*</span></label>
+          <div class="category-pill-group">
+            <label class="cat-pill-label">
+              <input type="radio" name="eventCatRadio" value="exam" checked />
+              <div class="cat-pill"><span>📝</span> Exam / Test</div>
+            </label>
+            <label class="cat-pill-label">
+              <input type="radio" name="eventCatRadio" value="work" />
+              <div class="cat-pill"><span>💼</span> Project Work</div>
+            </label>
+            <label class="cat-pill-label">
+              <input type="radio" name="eventCatRadio" value="deadline" />
+              <div class="cat-pill"><span>⏰</span> Hard Deadline</div>
+            </label>
+            <label class="cat-pill-label">
+              <input type="radio" name="eventCatRadio" value="reminder" />
+              <div class="cat-pill"><span>📌</span> Priority Task</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="input-block">
+          <label>Assigned Lead</label>
+          <select id="eventMemberSelect">
+            <option value="cohort">Joint Cohort (All)</option>
+            <!-- Member options populated by JS -->
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save to Calendar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Add New Cohort Member -->
+  <div class="modal-overlay" id="memberModal">
+    <div class="modal-box">
+      <div class="modal-top">
+        <div class="modal-titles">
+          <h2>Add New Teammate</h2>
+          <p>Bring another friend into the Chanakya accountability cohort</p>
+        </div>
+        <button class="close-btn" onclick="closeMemberModal()">&times;</button>
+      </div>
+
+      <form id="memberForm" onsubmit="submitNewMember(event)">
+        <div class="input-block">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" id="newMemberName" placeholder="e.g. Rahul Sharma" required />
+        </div>
+
+        <div class="input-block">
+          <label>Branch / Track <span class="req">*</span></label>
+          <input type="text" id="newMemberDept" placeholder="e.g. B.Tech - CSE / AI or BBA" required />
+        </div>
+
+        <div class="input-block">
+          <label>Profile Color Theme</label>
+          <div class="color-picker-row">
+            <label><input type="radio" name="memberColor" value="#06b6d4" checked /><span class="color-circle" style="background:#06b6d4;"></span></label>
+            <label><input type="radio" name="memberColor" value="#a855f7" /><span class="color-circle" style="background:#a855f7;"></span></label>
+            <label><input type="radio" name="memberColor" value="#10b981" /><span class="color-circle" style="background:#10b981;"></span></label>
+            <label><input type="radio" name="memberColor" value="#f59e0b" /><span class="color-circle" style="background:#f59e0b;"></span></label>
+            <label><input type="radio" name="memberColor" value="#ec4899" /><span class="color-circle" style="background:#ec4899;"></span></label>
+            <label><input type="radio" name="memberColor" value="#3b82f6" /><span class="color-circle" style="background:#3b82f6;"></span></label>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeMemberModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Enroll Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Milestone Creation -->
+  <div class="modal-overlay" id="milestoneModal">
+    <div class="modal-box">
+      <div class="modal-top">
+        <div class="modal-titles">
+          <h2>Create Milestone</h2>
+          <p>Define a shared deliverable or syllabus target</p>
+        </div>
+        <button class="close-btn" onclick="closeMilestoneModal()">&times;</button>
+      </div>
+
+      <form id="milestoneForm" onsubmit="submitNewMilestone(event)">
+        <div class="input-block">
+          <label>Milestone Title <span class="req">*</span></label>
+          <input type="text" id="msTitleInput" placeholder="e.g. Complete ASB Bus Controller RTL and Testbench" required />
+        </div>
+
+        <div class="form-row-2">
+          <div class="input-block">
+            <label>Assigned Lead</label>
+            <select id="msOwnerSelect" required>
+              <option value="cohort">Joint Cohort Effort</option>
+            </select>
+          </div>
+          <div class="input-block">
+            <label>Target Deadline</label>
+            <input type="date" id="msDateInput" required />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeMilestoneModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Milestone</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dedicated Printable PDF Report Container -->
+  <div id="printReportContainer" class="print-only-report"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
